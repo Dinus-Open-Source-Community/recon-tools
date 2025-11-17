@@ -1,0 +1,6 @@
+services:
+  recon_tools:
+    build: .
+    network_mode: "host"
+    volumes:
+      - .:/app:rw

@@ -5,3 +5,7 @@ pythonping
 requests
 python-nmap
 builtwith
+wafw00f
+sublist3r
+subfinder
+dirsearch

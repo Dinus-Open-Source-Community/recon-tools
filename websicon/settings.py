@@ -27,6 +27,8 @@ SECRET_KEY = 'janganbangggggg'
 DEBUG = True
 
 ALLOWED_HOSTS = [
+        "20.2.200.57",
+        'localhost'
     # '192.168.1.13'
     # '.ngrok-free.app',
     # 'c1b3285ea8c2.ngrok-free.app',

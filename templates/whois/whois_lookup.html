@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}WHOIS Lookup - Domain Checker{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="text-center mb-0">🔍 WHOIS Domain Lookup</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted text-center">
+                        Cek informasi WHOIS untuk berbagai domain (com, net, org, info, dll)
+                    </p>
+                    
+                    <!-- Form tanpa submit normal -->
+                    <form id="whoisForm">
+                        {% csrf_token %}
+                        <div class="input-group input-group-lg mb-4">
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="domainInput" 
+                                   name="domain"
+                                   placeholder="Masukkan domain (contoh: example.com)"
+                                   required
+                                   autocomplete="off">
+                            
+                            <!-- Perbaikan: tombol bukan submit -->
+                            <button class="btn btn-primary" type="button" id="lookupBtn">
+                                <span id="btnText">Cek WHOIS</span>
+                                <div id="btnLoading" class="spinner-border spinner-border-sm d-none"></div>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Debug Info -->
+                    <div id="debugInfo" class="alert alert-info d-none">
+                        <strong>Debug Info:</strong> 
+                        <div id="debugContent"></div>
+                    </div>
+
+                    <!-- Result Area -->
+                    <div id="resultArea" class="d-none">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0" id="resultTitle">Hasil WHOIS Lookup</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="whoisResult"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Area -->
+                    <div id="errorArea" class="alert alert-danger d-none mt-3">
+                        <strong>❌ Error:</strong> <span id="errorMessage"></span>
+                    </div>
+
+                    <!-- Examples -->
+                    <div class="mt-4">
+                        <h5>Contoh Domain untuk Dicoba:</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-secondary domain-example" style="cursor: pointer;" data-domain="google.com">google.com</span>
+                            <span class="badge bg-secondary domain-example" style="cursor: pointer;" data-domain="github.com">github.com</span>
+                            <span class="badge bg-secondary domain-example" style="cursor: pointer;" data-domain="python.org">python.org</span>
+                            <span class="badge bg-secondary domain-example" style="cursor: pointer;" data-domain="wikipedia.org">wikipedia.org</span>
+                            <span class="badge bg-secondary domain-example" style="cursor: pointer;" data-domain="stackoverflow.com">stackoverflow.com</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">ℹ️ Apa itu WHOIS?</h5>
+                </div>
+                <div class="card-body">
+                    <p>WHOIS adalah protokol query dan response yang banyak digunakan untuk menanyakan database yang menyimpan data pengguna terdaftar atau sumber daya internet, seperti nama domain, blok alamat IP, atau otonom sistem.</p>
+                    <p><strong>Dengan tool ini, Anda dapat melihat informasi tentang:</strong></p>
+                    <ul>
+                        <li>📋 Registrar domain</li>
+                        <li>📅 Tanggal pendaftaran dan kedaluwarsa</li>
+                        <li>🌐 Name servers</li>
+                        <li>📊 Status domain</li>
+                        <li>📧 Informasi kontak (jika tersedia)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.domain-example:hover {
+    background-color: #6c757d !important;
+    transform: scale(1.05);
+    transition: all 0.2s;
+}
+
+.whois-info-item {
+    border-bottom: 1px solid #eee;
+    padding: 10px 0;
+    display: flex;
+}
+
+.whois-info-item strong {
+    min-width: 200px;
+}
+
+.whois-info-item:last-child {
+    border-bottom: none;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+}
+
+.result-badge {
+    font-family: monospace;
+    background: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid #dee2e6;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+$(document).ready(function () {
+    {% comment %} aku benci js {% endcomment %}
+    {% comment %} alert("JS LOADED"); {% endcomment %}
+
+    // Prevent default form submission
+    $("#whoisForm").on("submit", function(e){
+        e.preventDefault();
+        return false;
+    });
+    
+    $('.domain-example').on('click', function() {
+        const domain = $(this).data('domain');
+        const type = $(this).data('type') || 'A';
+        
+        $('#domainInput').val(domain);
+        $('#recordType').val(type);
+        performLookup();
+    });
+
+    // Tombol click
+    $("#lookupBtn").on("click", function(e){
+        e.preventDefault();
+        performLookup();
+    });
+
+    // Event input ENTER
+    $("#domainInput").on("keypress", function(e){
+        if (e.key === "Enter") {
+            e.preventDefault();
+            performLookup();
+        }
+    });
+
+    // Ambil CSRF token
+    function getCSRF() {
+        return document.cookie
+            .split("; ")
+            .find(c => c.startsWith("csrftoken="))
+            ?.split("=")[1];
+    }
+
+    // Fungsi AJAX utama
+    function performLookup() {
+        const domain = $("#domainInput").val().trim();
+
+        if (!domain) {
+            showError("Domain tidak boleh kosong.");
+            return;
+        }
+
+        // Ubah tombol jadi loading
+        $("#btnText").addClass("d-none");
+        $("#btnLoading").removeClass("d-none");
+
+        // Clear result sebelumnya
+        $("#errorArea").addClass("d-none");
+        $("#resultArea").addClass("d-none");
+        $("#whoisResult").html("");
+
+        $.ajax({
+            url: "{% url 'whois_api' %}",
+            type: "POST",
+            headers: { "X-CSRFToken": getCSRF() },
+            data: { domain: domain },
+
+            success: function (response) {
+                console.log("SUCCESS:", response);
+                showResult(response);
+            },
+
+            error: function (xhr) {
+                console.log("ERROR:", xhr);
+                showError("Gagal mengambil WHOIS. Pastikan domain valid.");
+            },
+
+            complete: function () {
+                // Reset tombol loading
+                $("#btnText").removeClass("d-none");
+                $("#btnLoading").addClass("d-none");
+            }
+        });
+    }
+
+    // ================================
+    //        DISPLAY TO PAGE
+    // ================================
+    function showResult(response) {
+        $("#resultArea").removeClass("d-none");
+
+        const data = response.data;
+
+        const allowedKeys = [
+            "domain",
+            "registrar",
+            "creation_date",
+            "expiration_date",
+            "updated_date",
+            "name_servers",
+            "status",
+            "emails",
+            "org",
+            "country"
+        ];
+
+        let html = "";
+
+        allowedKeys.forEach(key => {
+            if (data[key] !== undefined && data[key] !== null) {
+                let value = Array.isArray(data[key]) 
+                    ? data[key].join(", ") 
+                    : data[key];
+
+                html += `
+                    <div class="whois-info-item">
+                        <strong>${key}:</strong> <span>${value}</span>
+                    </div>
+                `;
+            }
+        });
+
+        $("#whoisResult").html(html);
+    }
+
+    function showError(msg) {
+        $("#errorMessage").text(msg);
+        $("#errorArea").removeClass("d-none");
+    }
+});
+
+</script>
+
+{% endblock %}

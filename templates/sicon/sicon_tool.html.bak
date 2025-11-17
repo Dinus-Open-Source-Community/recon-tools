@@ -1,0 +1,864 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SICON - make your recon easy{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="text-center mb-0">🛡️ SICON - Security Scanner</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Scan Form -->
+                    <form id="scanForm">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="targetInput" class="form-label">
+                                    <strong>Target Domain:</strong>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="targetInput" 
+                                       placeholder="example.com"
+                                       required
+                                       autocomplete="off">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="scanType" class="form-label">
+                                    <strong>Scan Type:</strong>
+                                </label>
+                                <select class="form-select" id="scanType">
+                                    <option value="full">Full Scan</option>
+                                    <option value="waf">WAF Detection</option>
+                                    <option value="subdomain">Subdomain Scan</option>
+                                    <option value="port">Port Scan</option>
+                                    <option value="directory">Directory Scan</option>
+                                    <option value="cms">CMS Detection</option>
+                                    <option value="technology">Technology Detection</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <button class="btn btn-danger w-100" type="submit" id="scanBtn">
+                                    <span id="btnText">🚀 Start Scan</span>
+                                    <div id="btnLoading" class="spinner-border spinner-border-sm d-none" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Options -->
+                        <div class="row mt-3" id="advancedOptions" style="display: none;">
+                            <div class="col-md-6">
+                                <label for="userAgent" class="form-label">Custom User Agent:</label>
+                                <input type="text" class="form-control" id="userAgent" placeholder="Optional">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="proxy" class="form-label">Proxy:</label>
+                                <input type="text" class="form-control" id="proxy" placeholder="http://proxy:port (Optional)">
+                            </div>
+                        </div>
+
+                        <div class="mt-2">
+                            <a href="#" id="toggleAdvanced">⚙️ Advanced Options</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Active Scans -->
+            <div class="card mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">📊 Active Scans</h5>
+                </div>
+                <div class="card-body">
+                    <div id="activeScansList"></div>
+                </div>
+            </div>
+
+            <!-- Results Area -->
+            <div id="resultsArea" class="mt-4" style="display: none;">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0" id="resultsTitle">Scan Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="scanResults"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Area -->
+            <div id="errorArea" class="alert alert-danger mt-3" style="display: none;">
+                <strong>❌ Error:</strong> <span id="errorMessage"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.scan-item {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #f8f9fa;
+}
+
+.scan-status {
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+.status-queued { background: #fff3cd; color: #856404; }
+.status-running { background: #cce5ff; color: #004085; }
+.status-completed { background: #d4edda; color: #155724; }
+.status-failed { background: #f8d7da; color: #721c24; }
+
+.result-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    background: white;
+}
+
+.result-item {
+    padding: 8px;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.critical-item {
+    background: #fff5f5;
+    border: 2px solid #dc3545;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 10px;
+    animation: pulse-critical 2s infinite;
+}
+
+.critical-section {
+    border: 2px solid #dc3545;
+    border-radius: 10px;
+    padding: 15px;
+    background: #f8f9fa;
+}
+
+@keyframes pulse-critical {
+    0% { background-color: #fff5f5; }
+    50% { background-color: #ffe6e6; }
+    100% { background-color: #fff5f5; }
+}
+
+.sensitive-badge {
+    background: linear-gradient(45deg, #dc3545, #fd7e14);
+    color: white;
+    font-weight: bold;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.result-item {
+    transition: all 0.3s ease;
+}
+
+.result-item:hover {
+    transform: translateX(5px);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Global variables and functions
+let currentScanData = null;
+
+$(document).ready(function() {
+    // Toggle advanced options
+    $('#toggleAdvanced').on('click', function(e) {
+        e.preventDefault();
+        $('#advancedOptions').slideToggle();
+    });
+
+    // Quick scan buttons
+    $('.quick-scan').on('click', function() {
+        const target = $(this).data('target');
+        $('#targetInput').val(target);
+        startScan();
+    });
+
+    // Form submission
+    $('#scanForm').on('submit', function(e) {
+        e.preventDefault();
+        startScan();
+    });
+
+    // Load active scans
+    loadActiveScans();
+    setInterval(loadActiveScans, 5000); // Refresh every 5 seconds
+
+    function startScan() {
+        const target = $('#targetInput').val().trim();
+        const scanType = $('#scanType').val();
+        const userAgent = $('#userAgent').val();
+        const proxy = $('#proxy').val();
+
+        if (!target) {
+            showError('Please enter a target domain');
+            return;
+        }
+
+        setLoadingState(true);
+        hideResults();
+
+        const scanData = {
+            target: target,
+            scan_type: scanType,
+            user_agent: userAgent || null,
+            proxy: proxy || null
+        };
+
+        $.ajax({
+            url: '{% url "start_scan" %}',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(scanData),
+            success: function(response) {
+                showMessage('Scan started successfully!');
+                loadActiveScans();
+            },
+            error: function(xhr) {
+                try {
+                    const error = JSON.parse(xhr.responseText);
+                    showError(error.error || 'Failed to start scan');
+                } catch (e) {
+                    showError('Failed to start scan');
+                }
+            },
+            complete: function() {
+                setLoadingState(false);
+            }
+        });
+    }
+
+    function loadActiveScans() {
+        $.ajax({
+            url: '{% url "list_scans" %}',
+            type: 'GET',
+            success: function(response) {
+                displayActiveScans(response.scans);
+            },
+            error: function() {
+                $('#activeScansList').html('<div class="text-muted">Failed to load scans</div>');
+            }
+        });
+    }
+
+    function displayActiveScans(scans) {
+        if (scans.length === 0) {
+            $('#activeScansList').html('<div class="text-muted">No active scans</div>');
+            return;
+        }
+
+        let html = '';
+        scans.forEach(scan => {
+            const statusClass = `scan-status status-${scan.status}`;
+            
+            html += `
+                <div class="scan-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${scan.target}</strong> 
+                            <span class="badge bg-secondary">${scan.scan_type}</span>
+                        </div>
+                        <div>
+                            <span class="${statusClass}">${scan.status.toUpperCase()}</span>
+                            ${scan.status === 'completed' ? 
+                                `<button class="btn btn-sm btn-success ms-2" onclick="window.viewScanResults('${scan.id}')">View Results</button>` : 
+                                ''}
+                            ${scan.status !== 'running' ? 
+                                `<button class="btn btn-sm btn-danger ms-2" onclick="window.deleteScan('${scan.id}')">Delete</button>` : 
+                                ''}
+                        </div>
+                    </div>
+                    ${scan.request_time ? `<small class="text-muted">Started: ${new Date(scan.request_time).toLocaleString()}</small>` : ''}
+                    ${scan.duration ? `<small class="text-muted ms-2">Duration: ${scan.duration}s</small>` : ''}
+                </div>
+            `;
+        });
+
+        $('#activeScansList').html(html);
+    }
+
+    // Make functions available globally
+    window.viewScanResults = function(scanId) {
+        console.log('Loading results for scan:', scanId);
+        
+        $.ajax({
+            url: `/sicon/api/scan/${scanId}/`,
+            type: 'GET',
+            success: function(response) {
+                console.log('Scan results loaded:', response);
+                displayResults(response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Failed to load scan results:', error);
+                showError('Failed to load scan results: ' + error);
+            }
+        });
+    };
+
+    window.deleteScan = function(scanId) {
+        if (!confirm('Are you sure you want to delete this scan?')) return;
+
+        $.ajax({
+            url: `/sicon/api/scan/${scanId}/`,
+            type: 'DELETE',
+            success: function() {
+                showMessage('Scan deleted successfully');
+                loadActiveScans();
+                hideResults();
+            },
+            error: function(xhr, status, error) {
+                showError('Failed to delete scan: ' + error);
+            }
+        });
+    };
+
+    function displayResults(scanData) {
+        console.log('Displaying results:', scanData);
+        
+        let html = '';
+        
+        if (scanData.scan_type === 'full') {
+            html = displayFullResults(scanData.result);
+        } else {
+            html = displaySingleResults(scanData.scan_type, scanData.result);
+        }
+
+        $('#scanResults').html(html);
+        $('#resultsTitle').text(`Results for ${scanData.target} (${scanData.scan_type})`);
+        $('#resultsArea').show();
+        
+        // Scroll to results
+        $('html, body').animate({
+            scrollTop: $('#resultsArea').offset().top - 100
+        }, 500);
+    }
+
+    function displayFullResults(results) {
+        let html = '';
+        
+        console.log('Full results:', results);
+        
+        // WAF Results
+        if (results.waf) {
+            let wafStatus = '❌ No WAF Detected';
+            let wafClass = 'alert-warning';
+            
+            if (results.waf.detected) {
+                wafStatus = `✅ WAF Detected: <strong>${results.waf.name || 'Unknown WAF'}</strong>`;
+                wafClass = 'alert-success';
+            }
+            
+            html += `
+                <div class="result-section">
+                    <h6>🛡️ WAF Detection</h6>
+                    <div class="alert ${wafClass}">
+                        ${wafStatus}
+                    </div>
+                    ${results.waf.output ? `
+                        <details>
+                            <summary>Raw Output</summary>
+                            <pre class="mt-2 small"><code>${results.waf.output}</code></pre>
+                        </details>
+                    ` : ''}
+                    ${results.waf.error ? `
+                        <div class="alert alert-danger mt-2">
+                            Error: ${results.waf.error}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Subdomain Results
+        if (results.subdomain) {
+            const hasSubdomains = results.subdomain.results && results.subdomain.results.length > 0;
+            
+            html += `
+                <div class="result-section">
+                    <h6>🌐 Subdomains</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h4>${results.subdomain.total || 0}</h4>
+                                    <small>Total Subdomains</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h4>${results.subdomain.cpanel || 0}</h4>
+                                    <small>CPanel</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h4>${results.subdomain.non_cpanel || 0}</h4>
+                                    <small>Non-CPanel</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${hasSubdomains ? 
+                        `<div class="mt-3">
+                            <h6>Subdomain Details:</h6>
+                            ${results.subdomain.results.map(sub => 
+                                `<div class="result-item">
+                                    <strong>${sub.subdomain}</strong> 
+                                    <span class="badge ${sub.status === 'online' ? 'bg-success' : 'bg-warning'}">${sub.status}</span>
+                                    ${sub.ports && sub.ports.length > 0 ? 
+                                        `<small class="text-muted">Ports: ${sub.ports.join(', ')}</small>` : 
+                                        ''}
+                                    ${sub.error ? `<small class="text-danger">Error: ${sub.error}</small>` : ''}
+                                </div>`
+                            ).join('')}
+                        </div>` : 
+                        '<div class="alert alert-warning mt-2">No subdomains found or subdomain scanning failed</div>'}
+                    ${results.subdomain.error ? `
+                        <div class="alert alert-danger mt-2">
+                            Subdomain Error: ${results.subdomain.error}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Port Results
+        if (results.port) {
+            const hasPorts = results.port.ports && results.port.ports.length > 0;
+            
+            html += `
+                <div class="result-section">
+                    <h6>🔌 Port Scan</h6>
+                    <div class="alert ${hasPorts ? 'alert-success' : 'alert-warning'}">
+                        Found <strong>${results.port.total || 0}</strong> open ports
+                    </div>
+                    ${hasPorts ? 
+                        results.port.ports.map(port => 
+                            `<div class="result-item">
+                                <span class="badge bg-success">PORT ${port.port}</span>
+                                <strong>${port.service}</strong>
+                                <span class="badge bg-secondary">${port.state}</span>
+                            </div>`
+                        ).join('') :
+                        '<div class="text-muted">No open ports found</div>'}
+                    ${results.port.error ? `
+                        <div class="alert alert-danger mt-2">
+                            Port Scan Error: ${results.port.error}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+    // Directory Results
+    if (results.directory) {
+        const hasDirectories = results.directory.directories && results.directory.directories.length > 0;
+        
+        // List of sensitive files/directories that should be marked as CRITICAL
+        const sensitivePatterns = [
+            /\.env/i,
+            /\.git/i,
+            /\.htaccess/i,
+            /wp-config/i,
+            /config\.php/i,
+            /backup/i,
+            /database/i,
+            /sql/i,
+            /phpinfo.php/i,
+            /\.bash_history/i,
+            /\.ssh/i,
+            /\.aws/i,
+            /\.docker/i,
+            /\.kube/i,
+            /\.password/i,
+            /secret/i,
+            /private/i,
+            /\.pem/i,
+            /\.key/i,
+            /\.crt/i,
+            /\.pfx/i,
+            /\.p12/i
+        ];
+        
+        // Categorize directories
+        let criticalDirs = [];
+        let normalDirs = [];
+        
+        if (hasDirectories) {
+            results.directory.directories.forEach(dir => {
+                const isSensitive = sensitivePatterns.some(pattern => pattern.test(dir.url));
+                if (isSensitive && dir.status === 200) {
+                    criticalDirs.push(dir);
+                } else {
+                    normalDirs.push(dir);
+                }
+            });
+        }
+        
+        html += `
+            <div class="result-section">
+                <h6>📁 Directory Scan</h6>
+                <div class="alert ${hasDirectories ? 'alert-success' : 'alert-warning'}">
+                    Found <strong>${results.directory.total || 0}</strong> directories
+                    ${criticalDirs.length > 0 ? 
+                        ` | <span class="text-danger fw-bold">${criticalDirs.length} CRITICAL</span>` : 
+                        ''}
+                </div>
+                
+                <!-- Critical Directories -->
+                ${criticalDirs.length > 0 ? `
+                    <div class="critical-section mb-3">
+                        <div class="alert alert-danger">
+                            <h6>🚨 CRITICAL FINDINGS (${criticalDirs.length})</h6>
+                            <small class="text-danger">Sensitive files/directories exposed with status 200</small>
+                        </div>
+                        ${criticalDirs.map(dir => `
+                            <div class="result-item critical-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge bg-danger">CRITICAL</span>
+                                        <span class="badge ${dir.status === 200 ? 'bg-success' : dir.status === 403 ? 'bg-warning' : 'bg-secondary'}">
+                                            ${dir.status}
+                                        </span>
+                                        <a href="${dir.url}" target="_blank" class="ms-2 text-danger fw-bold">${dir.url}</a>
+                                    </div>
+                                    <div>
+                                        <span class="badge bg-dark">SENSITIVE</span>
+                                    </div>
+                                </div>
+                                <div class="mt-1">
+                                    <small class="text-muted">
+                                        ${getSensitiveType(dir.url)}
+                                        ${dir.status === 200 ? ' - PUBLICLY ACCESSIBLE!' : ''}
+                                    </small>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                <!-- Normal Directories -->
+                ${normalDirs.length > 0 ? `
+                    <div class="normal-section">
+                        <h6>Normal Directories (${normalDirs.length})</h6>
+                        ${normalDirs.slice(0, 15).map(dir => `
+                            <div class="result-item">
+                                <span class="badge ${dir.status === 200 ? 'bg-success' : dir.status === 403 ? 'bg-warning' : 'bg-secondary'}">
+                                    ${dir.status}
+                                </span>
+                                <a href="${dir.url}" target="_blank" class="ms-2">${dir.url}</a>
+                            </div>
+                        `).join('')}
+                        ${normalDirs.length > 200 ? `
+                            <div class="text-muted mt-2">
+                                ... and ${normalDirs.length - 200} more normal directories
+                            </div>
+                        ` : ''}
+                    </div>
+                ` : ''}
+                
+                ${!hasDirectories ? '<div class="text-muted">No directories found</div>' : ''}
+                
+                ${results.directory.error ? `
+                    <div class="alert alert-danger mt-2">
+                        Directory Scan Error: ${results.directory.error}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }
+    
+    // Helper function to determine sensitive type
+    function getSensitiveType(url) {
+        const patterns = {
+            '.env': 'Environment Configuration File',
+            '.git': 'Git Repository',
+            '.htaccess': 'Apache Configuration',
+            'wp-config': 'WordPress Configuration',
+            'config.php': 'PHP Configuration',
+            'backup': 'Backup File',
+            'database': 'Database File',
+            '.sql': 'SQL Database Dump',
+            'admin': 'Admin Panel',
+            'phpinfo': 'PHP Info',
+            '.bash_history': 'Bash History',
+            '.ssh': 'SSH Keys',
+            '.aws': 'AWS Credentials',
+            '.docker': 'Docker Configuration',
+            '.kube': 'Kubernetes Configuration',
+            '.password': 'Password File',
+            'secret': 'Secret File',
+            'private': 'Private File',
+            '.pem': 'SSL Private Key',
+            '.key': 'Encryption Key',
+            '.crt': 'SSL Certificate',
+            '.pfx': 'PKCS#12 Certificate',
+            '.p12': 'PKCS#12 Certificate'
+        };
+        
+        for (const [pattern, description] of Object.entries(patterns)) {
+            if (url.toLowerCase().includes(pattern.toLowerCase())) {
+                return description;
+            }
+        }
+        
+        return 'Sensitive File';
+    }
+
+        // CMS Results
+        if (results.cms) {
+            const cmsCounts = results.cms.cms_counts || {};
+            const hasCMS = Object.values(cmsCounts).some(count => count > 0);
+            
+            html += `
+                <div class="result-section">
+                    <h6>📋 CMS Detection</h6>
+                    <div class="alert ${hasCMS ? 'alert-success' : 'alert-warning'}">
+                        Scanned <strong>${results.cms.total_scanned || 0}</strong> sites
+                    </div>
+                    ${hasCMS ? 
+                        Object.entries(cmsCounts).map(([cms, count]) => 
+                            count > 0 ? `
+                                <div class="result-item">
+                                    <strong>${cms.charAt(0).toUpperCase() + cms.slice(1)}:</strong>
+                                    <span class="badge bg-success ms-2">${count} sites</span>
+                                </div>
+                            ` : ''
+                        ).join('') :
+                        '<div class="text-muted">No CMS detected</div>'}
+                    ${results.cms.error ? `
+                        <div class="alert alert-danger mt-2">
+                            CMS Detection Error: ${results.cms.error}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Technology Results
+        if (results.technology) {
+            const hasTechResults = results.technology.results && results.technology.results.length > 0;
+            
+            html += `
+                <div class="result-section">
+                    <h6>⚙️ Technology Detection</h6>
+                    <div class="alert ${hasTechResults ? 'alert-success' : 'alert-info'}">
+                        Scanned <strong>${results.technology.total || 0}</strong> sites for technologies
+                    </div>
+                    ${hasTechResults ? 
+                        results.technology.results.map(tech => 
+                            `<div class="result-item">
+                                <strong>${tech.url}</strong>
+                                ${tech.technologies && tech.technologies.length > 0 ? 
+                                    `<div><small class="text-success">Tech: ${tech.technologies.join(', ')}</small></div>` : 
+                                    '<div class="text-muted"><small>No technology detected</small></div>'}
+                                ${tech.error ? `<div class="text-danger"><small>Error: ${tech.error}</small></div>` : ''}
+                                ${tech.status_code ? `<div><small class="text-info">Status: ${tech.status_code}</small></div>` : ''}
+                            </div>`
+                        ).join('') :
+                        '<div class="text-muted">No technology information available</div>'}
+                    ${results.technology.error ? `
+                        <div class="alert alert-danger mt-2">
+                            Technology Detection Error: ${results.technology.error}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Jika tidak ada results sama sekali
+        if (!html) {
+            html = `
+                <div class="alert alert-warning">
+                    No scan results available. The scan may have completed but returned no data.
+                </div>
+            `;
+        }
+
+        return html;
+    }
+
+    function displaySingleResults(scanType, result) {
+        console.log('Single results:', scanType, result);
+        
+        switch(scanType) {
+            case 'waf':
+                let wafStatus = '❌ No WAF Detected';
+                let wafClass = 'alert-warning';
+                
+                if (result.detected) {
+                    wafStatus = `✅ WAF Detected: <strong>${result.name || 'Unknown WAF'}</strong>`;
+                    wafClass = 'alert-success';
+                }
+                
+                return `
+                    <div class="result-section">
+                        <h6>🛡️ WAF Detection</h6>
+                        <div class="alert ${wafClass}">
+                            ${wafStatus}
+                        </div>
+                        ${result.output ? `
+                            <details>
+                                <summary>Raw Output</summary>
+                                <pre class="mt-2 small"><code>${result.output}</code></pre>
+                            </details>
+                        ` : ''}
+                        ${result.error ? `
+                            <div class="alert alert-danger mt-2">
+                                Error: ${result.error}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+            case 'subdomain':
+                const hasSubdomains = result.results && result.results.length > 0;
+                
+                return `
+                    <div class="result-section">
+                        <h6>🌐 Subdomains Found: ${result.total || 0}</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-info text-white">
+                                    <div class="card-body text-center">
+                                        <h4>${result.cpanel || 0}</h4>
+                                        <small>CPanel</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h4>${result.non_cpanel || 0}</h4>
+                                        <small>Non-CPanel</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ${hasSubdomains ? 
+                            `<div class="mt-3">
+                                ${result.results.map(sub => 
+                                    `<div class="result-item">
+                                        <strong>${sub.subdomain}</strong> - ${sub.status}
+                                        ${sub.ports && sub.ports.length > 0 ? ` (Ports: ${sub.ports.join(', ')})` : ''}
+                                        ${sub.error ? `<div class="text-danger">Error: ${sub.error}</div>` : ''}
+                                    </div>`
+                                ).join('')}
+                            </div>` : 
+                            '<div class="alert alert-warning mt-2">No subdomains found</div>'}
+                        ${result.error ? `
+                            <div class="alert alert-danger mt-2">
+                                Error: ${result.error}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+            case 'port':
+                const hasPorts = result.ports && result.ports.length > 0;
+                
+                return `
+                    <div class="result-section">
+                        <h6>🔌 Open Ports: ${result.total || 0}</h6>
+                        ${hasPorts ? 
+                            result.ports.map(port => 
+                                `<div class="result-item">
+                                    <strong>Port ${port.port}</strong> - ${port.service} (${port.state})
+                                </div>`
+                            ).join('') :
+                            '<div class="alert alert-warning">No open ports found</div>'}
+                        ${result.error ? `
+                            <div class="alert alert-danger mt-2">
+                                Error: ${result.error}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+            default:
+                return `
+                    <div class="result-section">
+                        <h6>${scanType.toUpperCase()} Results</h6>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    </div>
+                `;
+        }
+    }
+
+    function setLoadingState(isLoading) {
+        if (isLoading) {
+            $('#btnText').addClass('d-none');
+            $('#btnLoading').removeClass('d-none');
+            $('#scanBtn').prop('disabled', true);
+        } else {
+            $('#btnText').removeClass('d-none');
+            $('#btnLoading').addClass('d-none');
+            $('#scanBtn').prop('disabled', false);
+        }
+    }
+
+    function hideResults() {
+        $('#resultsArea').hide();
+        $('#errorArea').hide();
+    }
+
+    function showError(message) {
+        $('#errorMessage').text(message);
+        $('#errorArea').show();
+        
+        $('html, body').animate({
+            scrollTop: $('#errorArea').offset().top - 100
+        }, 500);
+    }
+
+    function showMessage(message) {
+        // Simple notification
+        const alertDiv = $('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+            message +
+            '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+            '</div>');
+        
+        $('#scanForm').after(alertDiv);
+        
+        // Auto remove after 3 seconds
+        setTimeout(() => {
+            alertDiv.alert('close');
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}

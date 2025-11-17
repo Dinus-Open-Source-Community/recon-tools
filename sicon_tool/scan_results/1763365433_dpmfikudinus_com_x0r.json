@@ -1,0 +1,678 @@
+{
+  "id": "1763365433_dpmfikudinus_com_x0r",
+  "target": "dpmfikudinus.com",
+  "scan_type": "full",
+  "status": "completed",
+  "request_time": "2025-11-17T07:43:53.616911",
+  "user_agent": null,
+  "proxy": null,
+  "owner": "x0r",
+  "is_shareable": false,
+  "share_token": null,
+  "user_type": "authenticated",
+  "result": {
+    "waf": {
+      "detected": false,
+      "name": "No WAF detected",
+      "output": "~ WAFW00F : v2.3.1 ~\n[*] Checking http://dpmfikudinus.com\n[+] Generic Detection results:\n[-] No WAF detected by the generic detection\n[~] Number of requests: 7"
+    },
+    "subdomain": {
+      "total": 10,
+      "cpanel": 0,
+      "non_cpanel": 10,
+      "results": [
+        {
+          "subdomain": "dpmfikudinus.com",
+          "ports": [
+            21,
+            80,
+            443,
+            2121
+          ],
+          "status": "online"
+        },
+        {
+          "subdomain": "www.www.desajuara.dpmfikudinus.com",
+          "ports": [],
+          "status": "host offline"
+        },
+        {
+          "subdomain": "desajuara.dpmfikudinus.com",
+          "ports": [],
+          "status": "host offline"
+        },
+        {
+          "subdomain": "mulsa.dpmfikudinus.com",
+          "ports": [],
+          "status": "host offline"
+        },
+        {
+          "subdomain": "sitemap.dpmfikudinus.com",
+          "ports": [],
+          "status": "host offline"
+        },
+        {
+          "subdomain": "www.desajuara.dpmfikudinus.com",
+          "ports": [],
+          "status": "host offline"
+        },
+        {
+          "subdomain": "sitemaps.dpmfikudinus.com",
+          "ports": [],
+          "status": "host offline"
+        },
+        {
+          "subdomain": "www.www.www.desajuara.dpmfikudinus.com",
+          "ports": [],
+          "status": "host offline"
+        },
+        {
+          "subdomain": "www.dpmfikudinus.com",
+          "ports": [
+            21,
+            80,
+            443,
+            2121
+          ],
+          "status": "online"
+        },
+        {
+          "subdomain": "www.mulsa.dpmfikudinus.com",
+          "ports": [],
+          "status": "host offline"
+        }
+      ]
+    },
+    "port": {
+      "total": 3,
+      "ports": [
+        {
+          "port": "21",
+          "state": "open",
+          "service": "ftp ProFTPD or KnFTPD"
+        },
+        {
+          "port": "80",
+          "state": "open",
+          "service": "http LiteSpeed httpd"
+        },
+        {
+          "port": "443",
+          "state": "open",
+          "service": "ssl/http LiteSpeed httpd"
+        }
+      ]
+    },
+    "directory": {
+      "total": 113,
+      "directories": [
+        {
+          "url": "https://dpmfikudinus.com/.editorconfig",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/.env",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/.env.example",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/branches/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/COMMIT_EDITMSG",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/FETCH_HEAD",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/config",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/hooks/applypatch-msg",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/hooks/commit-msg",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/hooks/post-update",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/hooks/pre-applypatch",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/hooks/pre-push",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/hooks/pre-commit",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/hooks/pre-rebase",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/hooks/pre-receive",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/index",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/hooks/prepare-commit-msg",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/hooks/update",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/info/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/info/attributes",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/info/exclude",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/info/refs",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/logs/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/logs/head",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/logs/HEAD",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/logs/refs/heads",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/logs/refs",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/logs/refs/heads/master",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/logs/refs/remotes",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/logs/refs/remotes/origin",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/logs/refs/remotes/origin/HEAD",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/objects/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/logs/refs/remotes/origin/master",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/objects/info/packs",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/refs/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/packed-refs",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/refs/heads",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/refs/heads/master",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/refs/remotes/origin/HEAD",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/refs/remotes",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/refs/remotes/origin",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/refs/remotes/origin/master",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/refs/tags",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.gitattributes",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/.gitignore",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/.gitignore/",
+          "status": 404
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/description",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/head",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/HEAD",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.git/hooks/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hg/branch",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hg/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hg/hgrc",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hg/dirstate",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hg_archival.txt",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hg/undo.dirstate",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hgignore",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hgrc",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hgsubstate",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hgtags",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hgsub",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.htaccess.bak1",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.htaccess.orig",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.htaccess.save",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.htaccess.sample",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.htaccess_orig",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.htaccess_sc",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.htaccess_extra",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.htaccessBAK",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.htaccessOLD",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hg",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hg/store/data/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.htpasswds",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hg/store/undo",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hgsigs",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hg/requires",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.hgignore.global",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.htaccessOLD2",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.htpasswd_test",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.index.php.swp",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/.styleci.yml",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/.svn/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.svn/entries",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.svn/all-wcprops",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.svn/text",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.svn/text-base/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.svn/text-base/index.php.svn-base",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.svn/wc.db",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.svn/prop",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.svn",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.well-known/acme-challenge/dtfy",
+          "status": 404
+        },
+        {
+          "url": "https://dpmfikudinus.com/.wp-config.swp",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/.wp-config.php.swp",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/__index.php",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/_wpeprivate/config.json",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/_index.php",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/adm/index.php",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/admin/index.php",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/admin2/index.php",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/admin_index.php",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/adminindex.php",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/app/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/apc/index.php",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/assets/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/composer.json",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/config/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/config/app.php",
+          "status": 500
+        },
+        {
+          "url": "https://dpmfikudinus.com/composer.lock",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/database/",
+          "status": 403
+        },
+        {
+          "url": "https://dpmfikudinus.com/db/index.php",
+          "status": 200
+        },
+        {
+          "url": "https://dpmfikudinus.com/favicon.ico",
+          "status": 200
+        }
+      ]
+    },
+    "cms": {
+      "total_scanned": 10,
+      "cms_counts": {
+        "wordpress": 0,
+        "joomla": 0,
+        "drupal": 0,
+        "moodle": 0,
+        "unknown": 0
+      },
+      "results": {
+        "wordpress": [],
+        "joomla": [],
+        "drupal": [],
+        "moodle": [],
+        "unknown": []
+      }
+    },
+    "technology": {
+      "total": 10,
+      "results": [
+        {
+          "url": "http://dpmfikudinus.com",
+          "status": "success",
+          "status_code": 200,
+          "error": null,
+          "technologies": [
+            "LiteSpeed",
+            "Google Font API",
+            "OWL Carousel",
+            "jQuery",
+            "jQuery",
+            "Twitter Bootstrap",
+            "PHP/8.2.29",
+            "Server: LiteSpeed",
+            "Framework: Laravel"
+          ]
+        },
+        {
+          "url": "http://www.www.desajuara.dpmfikudinus.com",
+          "status": "request_error",
+          "status_code": null,
+          "error": "Timeout / Host Offline",
+          "technologies": []
+        },
+        {
+          "url": "http://desajuara.dpmfikudinus.com",
+          "status": "request_error",
+          "status_code": null,
+          "error": "Timeout / Host Offline",
+          "technologies": []
+        },
+        {
+          "url": "http://mulsa.dpmfikudinus.com",
+          "status": "request_error",
+          "status_code": null,
+          "error": "Timeout / Host Offline",
+          "technologies": []
+        },
+        {
+          "url": "http://sitemap.dpmfikudinus.com",
+          "status": "request_error",
+          "status_code": null,
+          "error": "Timeout / Host Offline",
+          "technologies": []
+        },
+        {
+          "url": "http://www.desajuara.dpmfikudinus.com",
+          "status": "request_error",
+          "status_code": null,
+          "error": "Timeout / Host Offline",
+          "technologies": []
+        },
+        {
+          "url": "http://sitemaps.dpmfikudinus.com",
+          "status": "request_error",
+          "status_code": null,
+          "error": "Timeout / Host Offline",
+          "technologies": []
+        },
+        {
+          "url": "http://www.www.www.desajuara.dpmfikudinus.com",
+          "status": "request_error",
+          "status_code": null,
+          "error": "Timeout / Host Offline",
+          "technologies": []
+        },
+        {
+          "url": "http://www.dpmfikudinus.com",
+          "status": "success",
+          "status_code": 200,
+          "error": null,
+          "technologies": [
+            "LiteSpeed",
+            "Google Font API",
+            "OWL Carousel",
+            "jQuery",
+            "jQuery",
+            "Twitter Bootstrap",
+            "PHP/8.2.29",
+            "Server: LiteSpeed",
+            "Framework: Laravel"
+          ]
+        },
+        {
+          "url": "http://www.mulsa.dpmfikudinus.com",
+          "status": "request_error",
+          "status_code": null,
+          "error": "Timeout / Host Offline",
+          "technologies": []
+        }
+      ]
+    }
+  },
+  "completion_time": "2025-11-17T07:45:34.095492",
+  "duration": 100.48
+}

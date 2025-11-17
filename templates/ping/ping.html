@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ping Tool - Network Diagnostic{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h2 class="text-center mb-0">📡 Ping Tool - Network Diagnostic</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted text-center">
+                        Test koneksi jaringan ke host atau IP address dengan ICMP ping
+                    </p>
+                    
+                    <!-- Ping Form -->
+                    <form id="pingForm">
+                        {% csrf_token %}
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-5">
+                                <label for="targetInput" class="form-label">
+                                    <strong>Target Host/IP:</strong>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="targetInput" 
+                                       placeholder="example.com atau 192.168.1.1"
+                                       required
+                                       autocomplete="off">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="countInput" class="form-label">
+                                    <strong>Count:</strong>
+                                </label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="countInput" 
+                                       value="4" 
+                                       min="1" 
+                                       max="10"
+                                       title="Jumlah packet ping (1-10)">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="timeoutInput" class="form-label">
+                                    <strong>Timeout (s):</strong>
+                                </label>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="timeoutInput" 
+                                       value="2" 
+                                       min="1" 
+                                       max="10"
+                                       title="Timeout dalam detik (1-10)">
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-warning w-100" type="submit" id="pingBtn">
+                                    <span id="btnText">🚀 Start Ping</span>
+                                    <div id="btnLoading" class="spinner-border spinner-border-sm d-none" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Quick Actions -->
+                    <div class="mt-3">
+                        <small class="text-muted">Quick ping:</small>
+                        <div class="d-flex flex-wrap gap-2 mt-1">
+                            <button class="btn btn-sm btn-outline-secondary quick-ping" data-target="google.com">google.com</button>
+                            <button class="btn btn-sm btn-outline-secondary quick-ping" data-target="8.8.8.8">8.8.8.8</button>
+                            <button class="btn btn-sm btn-outline-secondary quick-ping" data-target="1.1.1.1">1.1.1.1</button>
+                            <button class="btn btn-sm btn-outline-secondary quick-ping" data-target="github.com">github.com</button>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Output -->
+                    <div id="pingOutput" class="mt-4 d-none">
+                        <div class="card">
+                            <div class="card-header bg-dark text-white">
+                                <h5 class="mb-0">📊 Ping Results</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div id="outputContent" class="console-output"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Results -->
+                    <div id="summaryArea" class="d-none mt-4"></div>
+
+                    <!-- Error Area -->
+                    <div id="errorArea" class="alert alert-danger d-none mt-3">
+                        <strong>❌ Error:</strong> <span id="errorMessage"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">ℹ️ Tentang Ping</h6>
+                        </div>
+                        <div class="card-body">
+                            <p>Ping adalah tool network diagnostic yang menggunakan ICMP protocol untuk:</p>
+                            <ul>
+                                <li>Test konektivitas jaringan</li>
+                                <li>Mengukur latency (waktu respons)</li>
+                                <li>Mendeteksi packet loss</li>
+                                <li>Memeriksa status host/device</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">📋 Parameter Ping</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="parameter-item">
+                                <strong>Count:</strong> Jumlah packet ICMP yang dikirim
+                            </div>
+                            <div class="parameter-item">
+                                <strong>Timeout:</strong> Waktu tunggu maksimal untuk setiap respons (detik)
+                            </div>
+                            <div class="parameter-item">
+                                <strong>Target:</strong> Domain name atau IP address tujuan
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.console-output {
+    background: #1e1e1e;
+    color: #00ff00;
+    font-family: 'Courier New', monospace;
+    padding: 15px;
+    border-radius: 0 0 1px 1px;
+    min-height: 100px;
+    max-height: 2000px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-size: 0.7em;
+}
+
+.ping-success {
+    color: #00ff00;
+}
+
+.ping-failure {
+    color: #ff4444;
+}
+
+.ping-warning {
+    color: #ffaa00;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-value {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.parameter-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.parameter-item:last-child {
+    border-bottom: none;
+}
+
+.quick-ping:hover {
+    transform: translateY(-1px);
+    transition: all 0.2s;
+}
+
+.ping-sequence {
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.05);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    console.log('Ping Tool loaded');
+    
+    // Handle form submission
+    $('#pingForm').on('submit', function(e) {
+        e.preventDefault();
+        performPing();
+    });
+
+    // Handle quick ping buttons
+    $('.quick-ping').on('click', function() {
+        const target = $(this).data('target');
+        $('#targetInput').val(target);
+        performPing();
+    });
+
+    function performPing() {
+        const target = $('#targetInput').val().trim();
+        const count = $('#countInput').val();
+        const timeout = $('#timeoutInput').val();
+        
+        console.log('Pinging:', target, 'Count:', count, 'Timeout:', timeout);
+        
+        if (!target) {
+            showError('Silakan masukkan target host atau IP address');
+            return;
+        }
+
+        // Set loading state
+        setLoadingState(true);
+        hideAllResults();
+        
+        // Clear previous output
+        $('#outputContent').html('<div class="ping-sequence">Starting ping...</div>');
+        $('#pingOutput').removeClass('d-none');
+
+        // Prepare data
+        const formData = new FormData();
+        formData.append('target', target);
+        formData.append('count', count);
+        formData.append('timeout', timeout);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        // Perform AJAX request
+        fetch('{% url "ping_api" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Ping response:', data);
+            
+            if (data.success) {
+                displayPingResults(data.data);
+            } else {
+                showError(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('AJAX Error:', error);
+            showError('Gagal terhubung ke server');
+        })
+        .finally(() => {
+            setLoadingState(false);
+        });
+    }
+
+    function setLoadingState(isLoading) {
+        if (isLoading) {
+            $('#btnText').addClass('d-none');
+            $('#btnLoading').removeClass('d-none');
+            $('#pingBtn').prop('disabled', true);
+        } else {
+            $('#btnText').removeClass('d-none');
+            $('#btnLoading').addClass('d-none');
+            $('#pingBtn').prop('disabled', false);
+        }
+    }
+
+    function hideAllResults() {
+        $('#summaryArea').addClass('d-none');
+        $('#errorArea').addClass('d-none');
+    }
+
+    function displayPingResults(data) {
+        const results = data.results;
+        const summary = data.summary;
+        
+        // Display individual ping results
+        let outputHtml = '';
+        
+        results.forEach((result, index) => {
+            const sequenceClass = result.success ? 'ping-success' : 'ping-failure';
+            const icon = result.success ? '✅' : '❌';
+            const timeInfo = result.success ? `time=${result.time_ms}ms` : 'timeout';
+            
+            outputHtml += `
+                <div class="ping-sequence ${sequenceClass}">
+                    ${icon} Reply from ${summary.target}: ${timeInfo} 
+                    ${result.success ? '' : '- Request timed out'}
+                </div>
+            `;
+        });
+        
+        // Add summary line
+        outputHtml += `
+            <div class="ping-sequence ping-warning">
+                📊 Ping statistics for ${summary.target}:
+                Packets: Sent = ${summary.packets_sent}, Received = ${summary.packets_received}, 
+                Lost = ${summary.packets_sent - summary.packets_received} (${summary.packet_loss}% loss)
+            </div>
+        `;
+        
+        if (summary.packets_received > 0) {
+            outputHtml += `
+                <div class="ping-sequence ping-success">
+                    ⏱️ Approximate round trip times in milli-seconds:
+                    Minimum = ${summary.min_time}ms, Maximum = ${summary.max_time}ms, 
+                    Average = ${summary.avg_time}ms
+                </div>
+            `;
+        }
+        
+        $('#outputContent').html(outputHtml);
+        
+        // Display summary card
+        displaySummaryCard(summary);
+        
+        $('#errorArea').addClass('d-none');
+        
+        // Scroll to results
+        $('html, body').animate({
+            scrollTop: $('#pingOutput').offset().top - 100
+        }, 500);
+    }
+
+    function displaySummaryCard(summary) {
+        const summaryHtml = `
+            <div class="card summary-card">
+                <div class="card-body">
+                    <h5 class="card-title">📈 Ping Summary</h5>
+                    <div class="stat-item">
+                        <span>Target:</span>
+                        <span class="stat-value">${summary.target}</span>
+                    </div>
+                    ${summary.resolved_ip ? `
+                    <div class="stat-item">
+                        <span>Resolved IP:</span>
+                        <span class="stat-value">${summary.resolved_ip}</span>
+                    </div>
+                    ` : ''}
+                    <div class="stat-item">
+                        <span>Packets Sent/Received:</span>
+                        <span class="stat-value">${summary.packets_sent} / ${summary.packets_received}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Packet Loss:</span>
+                        <span class="stat-value ${summary.packet_loss > 0 ? 'ping-failure' : 'ping-success'}">
+                            ${summary.packet_loss}%
+                        </span>
+                    </div>
+                    ${summary.packets_received > 0 ? `
+                    <div class="stat-item">
+                        <span>Min Time:</span>
+                        <span class="stat-value">${summary.min_time} ms</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Max Time:</span>
+                        <span class="stat-value">${summary.max_time} ms</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Avg Time:</span>
+                        <span class="stat-value">${summary.avg_time} ms</span>
+                    </div>
+                    ` : ''}
+                    <div class="stat-item">
+                        <span>Status:</span>
+                        <span class="stat-value ${summary.success ? 'ping-success' : 'ping-failure'}">
+                            ${summary.success ? '✅ Reachable' : '❌ Unreachable'}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        $('#summaryArea').html(summaryHtml).removeClass('d-none');
+    }
+
+    function showError(message) {
+        $('#errorMessage').text(message);
+        $('#errorArea').removeClass('d-none');
+        $('#summaryArea').addClass('d-none');
+        
+        $('html, body').animate({
+            scrollTop: $('#errorArea').offset().top - 100
+        }, 500);
+    }
+
+    // Enter key support
+    $('#targetInput').on('keypress', function(e) {
+        if (e.which === 13) {
+            e.preventDefault();
+            performPing();
+        }
+    });
+
+    // Focus on input field
+    $('#targetInput').focus();
+});
+</script>
+{% endblock %}

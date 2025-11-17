@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - AuthApp{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h2>Dashboard</h2>
+            </div>
+            <div class="card-body">
+                <h3>Selamat datang, {{ user.username }}!</h3>
+                <p>Ini adalah halaman dashboard yang hanya bisa diakses oleh pengguna yang sudah login.</p>
+                
+                <div class="mt-4">
+                    <h4>Informasi Akun:</h4>
+                    <ul>
+                        <li><strong>Username:</strong> {{ user.username }}</li>
+                        <li><strong>Email:</strong> {{ user.email|default:"Belum diatur" }}</li>
+                        <li><strong>Tanggal Bergabung:</strong> {{ user.date_joined|date:"d M Y" }}</li>
+                        <li><strong>Login Terakhir:</strong> {{ user.last_login|date:"d M Y H:i" }}</li>
+                    </ul>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{% url 'home' %}" class="btn btn-secondary">Kembali ke Home</a>
+                    
+                    <!-- Logout form alternatif di dashboard -->
+                    <form method="post" action="{% url 'logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

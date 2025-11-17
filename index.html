@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Scanner Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4a6bff;
+            --primary-dark: #3a56cc;
+            --secondary: #6c757d;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        .logo-img {
+            height: 45px;
+            width: 200px;
+            transition: all 0.3s ease;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover{
+            color: var(--primary);
+        }
+        .btn2 {
+            padding: 0.6rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+
+        .dashboard {
+            padding: 30px 0;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: var(--dark);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 500;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .scan-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--gray-light);
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(74, 107, 255, 0.2);
+        }
+
+        .select-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 16px;
+        }
+
+        .scans-list {
+            margin-top: 30px;
+        }
+
+        .scan-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--gray-light);
+            transition: background-color 0.3s;
+        }
+
+        .scan-item:hover {
+            background-color: var(--light);
+        }
+
+        .scan-info {
+            flex: 1;
+        }
+
+        .scan-target {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .scan-meta {
+            display: flex;
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .scan-meta span {
+            margin-right: 15px;
+        }
+
+        .scan-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status-queued {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .status-running {
+            background-color: var(--info);
+            color: white;
+        }
+
+        .status-completed {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .status-failed {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .scan-actions {
+            display: flex;
+        }
+
+        .scan-actions .btn {
+            margin-left: 10px;
+            padding: 5px 10px;
+            font-size: 13px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .result-section {
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+        }
+
+        .result-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .result-content {
+            background-color: var(--light);
+            border-radius: 5px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .badge-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .badge-warning {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+
+        .badge-info {
+            background-color: var(--info);
+            color: white;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .result-table th {
+            background-color: var(--primary);
+            color: white;
+            text-align: left;
+            padding: 10px;
+        }
+
+        .result-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .result-table tr:nth-child(even) {
+            background-color: var(--light);
+        }
+
+        .result-table tr:hover {
+            background-color: rgba(74, 107, 255, 0.1);
+        }
+
+        .status-badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .tech-tag {
+            background-color: var(--primary);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        .loading-results {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .loading-results .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: var(--gray-light);
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            height: 10px;
+            border-radius: 5px;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .tab-container {
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+        .section-title h3 {
+                font-size: 2rem;
+            }
+        .hero {
+            background: linear-gradient(135deg, #36BFFA, #4361ee, #7209b7);
+            color: white;
+            padding: 5rem 0 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 15%;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='rgba(255,255,255,.1)' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .hero p {
+            font-size: 1rem;
+            max-width: 600px;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 768px) {
+            .scan-form {
+                grid-template-columns: 1fr;
+            }
+
+            .scan-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .scan-actions {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero" id="beranda">
+        <div class="container hero-content">
+            <h2>S1C0N - Simple Reconnaissance For Exposures Analysis</h2>
+            <p>Alat ringan untuk mengidentifikasi Permukaan Serangan dan Risiko pada Infrastruktur Aplikasi Web</p>
+        </div>
+        <div class="cloud-animation"></div>
+    </section>
+    <main class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Scanner Dashboard</h1>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Start Scan</div>
+                </div>
+                <form id="scanForm" class="scan-form">
+                    <div class="form-group">
+                        <label for="target">Target URL/Domain</label>
+                        <input type="text" id="target" class="form-control" placeholder="example.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="scanType">Scan Type</label>
+                        <select id="scanType" class="form-control select-control">
+                            <option value="full">Full Scan</option>
+                            <option value="waf">WAF Detection</option>
+                            <option value="subdomain">Subdomain Scan</option>
+                            <option value="port">Port Scan</option>
+                            <option value="directory">Directory Scan</option>
+                            <option value="cms">CMS Detection</option>
+                            <option value="technology">Technology Detection</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userAgent">Custom User Agent (optional)</label>
+                        <input type="text" id="userAgent" class="form-control" placeholder="Mozilla/5.0...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="proxy">Proxy (optional)</label>
+                        <input type="text" id="proxy" class="form-control" placeholder="http://proxy.example.com:8080">
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Start Scan
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Recent Scans</div>
+                    <button id="refreshScans" class="btn btn-outline">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="scans-list" id="scansList">
+                    <div class="scan-item">
+                        <div class="scan-info">
+                            <div class="scan-target">Loading scans...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div class="modal" id="resultsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Scan Results</div>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+
+            <div class="tab-container">
+                <div class="tabs" id="resultsTabs">
+                    <div class="tab active" data-tab="summary">Summary</div>
+                    <div class="tab" data-tab="details">Details</div>
+                    <div class="tab" data-tab="raw">Raw Data</div>
+                </div>
+            </div>
+
+            <div class="tab-content active" id="summaryTab">
+                <div class="result-section">
+                    <div class="result-title">
+                        <i class="fas fa-info-circle"></i> Scan Information
+                    </div>
+                    <div class="result-content" id="scanInfoContent">
+                        Loading scan information...
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <div class="result-title">
+                        <i class="fas fa-chart-pie"></i> Quick Stats
+                    </div>
+                    <div class="result-grid" id="quickStats">
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="detailsTab">
+                <div class="result-section">
+                    <div class="result-title">
+                        <i class="fas fa-search"></i> Detailed Results
+                    </div>
+                    <div class="result-content" id="detailedResults">
+                        Loading detailed results...
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="rawTab">
+                <div class="result-section">
+                    <div class="result-title">
+                        <i class="fas fa-code"></i> Raw JSON Data
+                    </div>
+                    <div class="result-content">
+                        <pre id="rawResults">Loading raw data...</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('keydown', function(e) {
+
+            if (e.ctrlKey && e.key.toLowerCase() === 'u') {
+            e.preventDefault();
+            }
+
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'i') {
+            e.preventDefault();
+            }
+
+            if (e.key === 'F12') {
+            e.preventDefault();
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const scanForm = document.getElementById('scanForm');
+            const scansList = document.getElementById('scansList');
+            const refreshScans = document.getElementById('refreshScans');
+            const resultsModal = document.getElementById('resultsModal');
+            const closeModal = document.getElementById('closeModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const scanInfoContent = document.getElementById('scanInfoContent');
+            const quickStats = document.getElementById('quickStats');
+            const detailedResults = document.getElementById('detailedResults');
+            const rawResults = document.getElementById('rawResults');
+            const resultsTabs = document.getElementById('resultsTabs');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+
+            let currentScanId = null;
+            let scanInterval = null;
+
+
+            loadScans();
+
+
+            scanForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const target = document.getElementById('target').value;
+                const scanType = document.getElementById('scanType').value;
+                const userAgent = document.getElementById('userAgent').value;
+                const proxy = document.getElementById('proxy').value;
+
+                startScan(target, scanType, userAgent, proxy);
+            });
+
+
+            refreshScans.addEventListener('click', function() {
+                loadScans();
+            });
+
+
+            closeModal.addEventListener('click', function() {
+                resultsModal.style.display = 'none';
+                if (scanInterval) {
+                    clearInterval(scanInterval);
+                    scanInterval = null;
+                }
+            });
+
+
+            resultsTabs.addEventListener('click', function(e) {
+                if (e.target.classList.contains('tab')) {
+
+                    document.querySelectorAll('.tab').forEach(tab => {
+                        tab.classList.remove('active');
+                    });
+                    e.target.classList.add('active');
+
+
+                    const tabName = e.target.getAttribute('data-tab');
+                    tabContents.forEach(content => {
+                        content.classList.remove('active');
+                        if (content.id === `${tabName}Tab`) {
+                            content.classList.add('active');
+                        }
+                    });
+
+
+                    if (tabName === 'details' && currentScanId) {
+                        loadScanDetails(currentScanId);
+                    }
+                }
+            });
+
+
+            function startScan(target, scanType, userAgent, proxy) {
+                const data = {
+                    target: target,
+                    scan_type: scanType,
+                    user_agent: userAgent || null,
+                    proxy: proxy || null
+                };
+
+                fetch('http://192.168.1.13:3000/api/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(`Error: ${data.error}`);
+                    } else {
+
+                        scanForm.reset();
+
+                        loadScans();
+
+                        showScanResults(data.scan_id);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to start scan');
+                });
+            }
+
+            function createTable(data, columns) {
+                if (!data || data.length === 0) {
+                    return '<div class="result-item">No data available</div>';
+                }
+
+                let html = '<div class="result-item"><table class="result-table"><thead><tr>';
+
+
+                columns.forEach(col => {
+                    html += `<th>${col.header}</th>`;
+                });
+
+                html += '</tr></thead><tbody>';
+
+
+                data.forEach(item => {
+                    html += '<tr>';
+                    columns.forEach(col => {
+                        let value = item[col.key];
+
+
+                        if (col.format === 'status') {
+                            const statusClass = value === 'online' ? 'status-badge badge-success' :
+                                            value === 'offline' ? 'status-badge badge-danger' :
+                                            'status-badge badge-warning';
+                            value = `<span class="${statusClass}">${value}</span>`;
+                        } else if (col.format === 'ports' && Array.isArray(value)) {
+                            value = value.join(', ') || 'None';
+                        } else if (col.format === 'tech' && Array.isArray(value)) {
+                            value = value.map(tech => `<span class="tech-tag">${tech}</span>`).join('');
+                        } else if (col.format === 'status-code') {
+                            const statusClass = value === 200 ? 'status-badge badge-success' :
+                                            value === 403 || value === 500 ? 'status-badge badge-danger' :
+                                            'status-badge badge-warning';
+                            value = `<span class="${statusClass}">${value}</span>`;
+                        }
+
+                        html += `<td>${value || '-'}</td>`;
+                    });
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table></div>';
+                return html;
+            }
+
+            function loadScans() {
+                fetch('http://192.168.1.13:3000/api/scans')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.scans && data.scans.length > 0) {
+                        renderScansList(data.scans);
+                    } else {
+                        scansList.innerHTML = '<div class="scan-item"><div class="scan-info"><div class="scan-target">No scans found</div></div></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    scansList.innerHTML = '<div class="scan-item"><div class="scan-info"><div class="scan-target">Error loading scans</div></div></div>';
+                });
+            }
+
+
+            function renderScansList(scans) {
+
+                scans.sort((a, b) => new Date(b.request_time) - new Date(a.request_time));
+
+                scansList.innerHTML = '';
+
+                scans.forEach(scan => {
+                    const scanItem = document.createElement('div');
+                    scanItem.className = 'scan-item';
+
+                    const statusClass = `status-${scan.status}`;
+                    const formattedTime = new Date(scan.request_time).toLocaleString();
+
+                    scanItem.innerHTML = `
+                        <div class="scan-info">
+                            <div class="scan-target">${scan.target}</div>
+                            <div class="scan-meta">
+                                <span><i class="far fa-clock"></i> ${formattedTime}</span>
+                                <span><i class="fas fa-tasks"></i> ${scan.scan_type}</span>
+                            </div>
+                        </div>
+                        <div class="scan-status ${statusClass}">${scan.status}</div>
+                        <div class="scan-actions">
+                            <button class="btn btn-outline view-scan" data-scan-id="${scan.id}">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="btn btn-outline delete-scan" data-scan-id="${scan.id}">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    `;
+
+                    scansList.appendChild(scanItem);
+                });
+
+
+                document.querySelectorAll('.view-scan').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const scanId = this.getAttribute('data-scan-id');
+                        showScanResults(scanId);
+                    });
+                });
+
+
+                document.querySelectorAll('.delete-scan').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const scanId = this.getAttribute('data-scan-id');
+                        deleteScan(scanId);
+                    });
+                });
+            }
+
+
+            function showScanResults(scanId) {
+                currentScanId = scanId;
+                resultsModal.style.display = 'flex';
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                    if (tab.getAttribute('data-tab') === 'details') {
+                        tab.classList.add('active');
+                    }
+                });
+
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === 'detailsTab') {
+                        content.classList.add('active');
+                    }
+                });
+
+
+                loadScanData(scanId);
+                loadScanDetails(scanId);
+
+                if (scanInterval) {
+                    clearInterval(scanInterval);
+                }
+
+                fetch(`http://192.168.1.13:3000/api/scan/${scanId}`)
+                .then(response => response.json())
+                .then(scan => {
+                    if (scan.status === 'queued' || scan.status === 'running') {
+                        scanInterval = setInterval(() => {
+                            loadScanData(scanId);
+                            loadScanDetails(scanId);
+                        }, 3000);
+                    }
+                });
+            }
+
+            function loadScanData(scanId) {
+                fetch(`http://192.168.1.13:3000/api/scan/${scanId}`)
+                .then(response => response.json())
+                .then(scan => {
+
+                    modalTitle.textContent = `Scan Results: ${scan.target}`;
+                    const requestTime = new Date(scan.request_time).toLocaleString();
+                    const completionTime = scan.completion_time ? new Date(scan.completion_time).toLocaleString() : 'In progress';
+                    const duration = scan.duration ? `${Math.round(scan.duration)} seconds` : 'N/A';
+
+                    scanInfoContent.innerHTML = `
+                        <div class="result-item">
+                            <p><strong>Target:</strong> ${scan.target}</p>
+                            <p><strong>Scan Type:</strong> ${scan.scan_type}</p>
+                            <p><strong>Status:</strong> <span class="badge status-${scan.status}">${scan.status}</span></p>
+                            <p><strong>Request Time:</strong> ${requestTime}</p>
+                            <p><strong>Completion Time:</strong> ${completionTime}</p>
+                            <p><strong>Duration:</strong> ${duration}</p>
+                        </div>
+                    `;
+
+                    updateQuickStats(scan);
+
+                    rawResults.textContent = JSON.stringify(scan, null, 2);
+
+                    if (scan.status === 'completed' || scan.status === 'failed') {
+                        if (scanInterval) {
+                            clearInterval(scanInterval);
+                            scanInterval = null;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    scanInfoContent.innerHTML = '<div class="result-item">Error loading scan data</div>';
+                });
+            }
+
+
+            function updateQuickStats(scan) {
+                quickStats.innerHTML = '';
+
+                if (scan.status === 'queued' || scan.status === 'running') {
+                    quickStats.innerHTML = `
+                        <div class="result-item">
+                            <p><i class="fas fa-sync-alt fa-spin"></i> Scan in progress...</p>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: ${scan.status === 'queued' ? '30%' : '70%'}"></div>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (scan.status === 'failed') {
+                    quickStats.innerHTML = `
+                        <div class="result-item">
+                            <p><strong>Scan Failed:</strong> ${scan.error || 'Unknown error'}</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (scan.scan_type === 'full') {
+
+                    if (scan.result && scan.result.waf) {
+                        const waf = scan.result.waf;
+                        quickStats.innerHTML += `
+                            <div class="result-item">
+                                <p><strong>WAF Detection:</strong> ${waf.detected ? waf.name || 'Detected' : 'Not detected'}</p>
+                            </div>
+                        `;
+                    }
+
+                    if (scan.result && scan.result.subdomain) {
+                        const subdomain = scan.result.subdomain;
+                        quickStats.innerHTML += `
+                            <div class="result-item">
+                                <p><strong>Subdomains Found:</strong> ${subdomain.total}</p>
+                                <p><strong>CPanel Subdomains:</strong> ${subdomain.cpanel}</p>
+                                <p><strong>Regular Subdomains:</strong> ${subdomain.non_cpanel}</p>
+                            </div>
+                        `;
+                    }
+
+                    if (scan.result && scan.result.port) {
+                        const port = scan.result.port;
+                        quickStats.innerHTML += `
+                            <div class="result-item">
+                                <p><strong>Open Ports:</strong> ${port.total}</p>
+                                ${port.ports && port.ports.length > 0 ?
+                                    `<p><strong>Top Port:</strong> ${port.ports[0].port} (${port.ports[0].service})</p>` :
+                                    ''}
+                            </div>
+                        `;
+                    }
+
+                    if (scan.result && scan.result.directory) {
+                        const directory = scan.result.directory;
+                        quickStats.innerHTML += `
+                            <div class="result-item">
+                                <p><strong>Directories Found:</strong> ${directory.total}</p>
+                                ${directory.directories && directory.directories.length > 0 ?
+                                    `<p><strong>Status 200:</strong> ${directory.directories.filter(d => d.status === 200).length}</p>` :
+                                    ''}
+                            </div>
+                        `;
+                    }
+
+                    if (scan.result && scan.result.cms) {
+                        const cms = scan.result.cms;
+                        quickStats.innerHTML += `
+                            <div class="result-item">
+                                <p><strong>CMS Detected:</strong></p>
+                                <p>WordPress: ${cms.cms_counts.wordpress}</p>
+                                <p>Joomla: ${cms.cms_counts.joomla}</p>
+                                <p>Drupal: ${cms.cms_counts.drupal}</p>
+                                <p>Moodle: ${cms.cms_counts.moodle}</p>
+                            </div>
+                        `;
+                    }
+                } else if (scan.scan_type === 'waf') {
+
+                    if (scan.result) {
+                        quickStats.innerHTML = `
+                            <div class="result-item">
+                                <p><strong>WAF Detected:</strong> ${scan.result.detected ? 'Yes' : 'No'}</p>
+                                ${scan.result.name ? `<p><strong>WAF Name:</strong> ${scan.result.name}</p>` : ''}
+                            </div>
+                        `;
+                    }
+                } else if (scan.scan_type === 'subdomain') {
+
+                    if (scan.result) {
+                        quickStats.innerHTML = `
+                            <div class="result-item">
+                                <p><strong>Total Subdomains:</strong> ${scan.result.total}</p>
+                                <p><strong>CPanel Subdomains:</strong> ${scan.result.cpanel}</p>
+                                <p><strong>Regular Subdomains:</strong> ${scan.result.non_cpanel}</p>
+                            </div>
+                        `;
+                    }
+
+                } else if (scan.scan_type === 'subdomain') {
+
+                    if (scan.result) {
+                        const onlineCount = scan.result.results.filter(r => r.status === 'online').length;
+                        const offlineCount = scan.result.results.filter(r => r.status === 'offline').length;
+
+                        quickStats.innerHTML = `
+                            <div class="result-item">
+                                <p><strong>Total Subdomains:</strong> ${scan.result.total}</p>
+                                <p><strong>Online:</strong> <span class="badge-success">${onlineCount}</span></p>
+                                <p><strong>Offline:</strong> <span class="badge-danger">${offlineCount}</span></p>
+                                <p><strong>CPanel Subdomains:</strong> ${scan.result.cpanel}</p>
+                                <p><strong>Regular Subdomains:</strong> ${scan.result.non_cpanel}</p>
+                            </div>
+                        `;
+                    }
+                }else if (scan.scan_type === 'port') {
+
+                    if (scan.result) {
+                        quickStats.innerHTML = `
+                            <div class="result-item">
+                                <p><strong>Open Ports:</strong> ${scan.result.total}</p>
+                                ${scan.result.ports && scan.result.ports.length > 0 ?
+                                    `<p><strong>Top Port:</strong> ${scan.result.ports[0].port} (${scan.result.ports[0].service})</p>` :
+                                    ''}
+                            </div>
+                        `;
+                    }
+                } else if (scan.scan_type === 'directory') {
+
+                    if (scan.result) {
+                        const status200 = scan.result.directories.filter(d => d.status === 200).length;
+                        const status403 = scan.result.directories.filter(d => d.status === 403).length;
+                        const status500 = scan.result.directories.filter(d => d.status === 500).length;
+
+                        quickStats.innerHTML = `
+                            <div class="result-item">
+                                <p><strong>Directories Found:</strong> ${scan.result.total}</p>
+                                <p><strong>Status 200:</strong> ${status200}</p>
+                                <p><strong>Status 403:</strong> ${status403}</p>
+                                <p><strong>Status 500:</strong> ${status500}</p>
+                            </div>
+                        `;
+                    }
+                } else if (scan.scan_type === 'cms') {
+
+                    if (scan.result) {
+                        quickStats.innerHTML = `
+                            <div class="result-item">
+                                <p><strong>Sites Scanned:</strong> ${scan.result.total_scanned}</p>
+                                <p><strong>WordPress:</strong> ${scan.result.cms_counts.wordpress}</p>
+                                <p><strong>Joomla:</strong> ${scan.result.cms_counts.joomla}</p>
+                                <p><strong>Drupal:</strong> ${scan.result.cms_counts.drupal}</p>
+                                <p><strong>Moodle:</strong> ${scan.result.cms_counts.moodle}</p>
+                                <p><strong>Unknown:</strong> ${scan.result.cms_counts.unknown}</p>
+                            </div>
+                        `;
+                    }
+                } else if (scan.scan_type === 'technology') {
+
+                    if (scan.result) {
+
+                        const techCounts = {};
+                        scan.result.results.forEach(result => {
+                            if (result.technologies && result.technologies.length > 0) {
+                                result.technologies.forEach(tech => {
+                                    techCounts[tech] = (techCounts[tech] || 0) + 1;
+                                });
+                            }
+                        });
+
+                        const sortedTech = Object.entries(techCounts)
+                            .sort((a, b) => b[1] - a[1])
+                            .slice(0, 5);
+
+                        let techHTML = '';
+                        sortedTech.forEach(([tech, count]) => {
+                            techHTML += `<p><strong>${tech}:</strong> ${count}</p>`;
+                        });
+
+                        quickStats.innerHTML = `
+                            <div class="result-item">
+                                <p><strong>Sites Scanned:</strong> ${scan.result.total}</p>
+                                ${techHTML}
+                            </div>
+                        `;
+                    }
+                }
+            }
+
+            function loadScanDetails(scanId) {
+                fetch(`http://192.168.1.13:3000/api/scan/${scanId}`)
+                .then(response => response.json())
+                .then(scan => {
+                    if (!scan.result) {
+                        detailedResults.innerHTML = '<div class="result-item">No detailed results available yet. Scan may still be running.</div>';
+                        return;
+                    }
+
+                    let detailsHTML = '';
+                    const resultData = scan.scan_type === 'waf' || scan.scan_type === 'port' ||
+                                    scan.scan_type === 'directory' || scan.scan_type === 'cms' ||
+                                    scan.scan_type === 'technology' ? scan.result : scan.result;
+
+                    switch(scan.scan_type) {
+                        case 'waf':
+                            detailsHTML += '<h3><i class="fas fa-shield-alt"></i> WAF Detection Results</h3>';
+                            const wafColumns = [
+                                { header: 'Detected', key: 'detected', format: 'boolean' },
+                                { header: 'WAF Name', key: 'name' },
+                                { header: 'Details', key: 'output', format: 'pre' }
+                            ];
+                            detailsHTML += createTable([resultData], wafColumns);
+                            break;
+
+                        case 'subdomain':
+                            if (resultData.results) {
+                                detailsHTML += '<h3><i class="fas fa-sitemap"></i> Subdomain Results</h3>';
+                                const subdomainColumns = [
+                                    { header: 'Subdomain', key: 'subdomain' },
+                                    { header: 'Status', key: 'status', format: 'status' },
+                                    { header: 'Open Ports', key: 'ports', format: 'ports' }
+                                ];
+                                detailsHTML += createTable(resultData.results, subdomainColumns);
+                            }
+                            break;
+
+                        case 'port':
+                            if (resultData.ports) {
+                                detailsHTML += '<h3><i class="fas fa-plug"></i> Port Scan Results</h3>';
+                                const portColumns = [
+                                    { header: 'Port', key: 'port' },
+                                    { header: 'State', key: 'state' },
+                                    { header: 'Service', key: 'service' }
+                                ];
+                                detailsHTML += createTable(resultData.ports, portColumns);
+                            }
+                            break;
+
+                        case 'directory':
+                            if (resultData.directories) {
+                                detailsHTML += '<h3><i class="fas fa-folder-open"></i> Directory Scan Results</h3>';
+                                const dirColumns = [
+                                    { header: 'URL', key: 'url' },
+                                    { header: 'Status', key: 'status', format: 'status-code' }
+                                ];
+                                detailsHTML += createTable(resultData.directories, dirColumns);
+                            }
+                            break;
+
+                        case 'cms':
+                            if (resultData.results) {
+                                detailsHTML += '<h3><i class="fas fa-puzzle-piece"></i> CMS Detection Results</h3>';
+                                let cmsData = [];
+                                for (const [cmsType, urls] of Object.entries(resultData.results)) {
+                                    urls.forEach(url => {
+                                        cmsData.push({
+                                            cms: cmsType.charAt(0).toUpperCase() + cmsType.slice(1),
+                                            url: url
+                                        });
+                                    });
+                                }
+                                const cmsColumns = [
+                                    { header: 'CMS', key: 'cms' },
+                                    { header: 'URL', key: 'url' }
+                                ];
+                                detailsHTML += createTable(cmsData, cmsColumns);
+                            }
+                            break;
+
+                        case 'technology':
+                            if (resultData.results) {
+                                detailsHTML += '<h3><i class="fas fa-code"></i> Technology Detection Results</h3>';
+                                const techColumns = [
+                                    { header: 'URL', key: 'url' },
+                                    { header: 'Status', key: 'status' },
+                                    { header: 'Technologies', key: 'technologies', format: 'tech' }
+                                ];
+                                detailsHTML += createTable(resultData.results, techColumns);
+                            }
+                            break;
+
+                        case 'full':
+
+                            if (resultData.waf) {
+                                detailsHTML += '<h3><i class="fas fa-shield-alt"></i> WAF Detection</h3>';
+                                const wafColumns = [
+                                    { header: 'Detected', key: 'detected', format: 'boolean' },
+                                    { header: 'WAF Name', key: 'name' },
+                                    { header: 'Details', key: 'output', format: 'pre' }
+                                ];
+                                detailsHTML += createTable([resultData.waf], wafColumns);
+                            }
+
+                            if (resultData.subdomain?.results) {
+                                detailsHTML += '<h3><i class="fas fa-sitemap"></i> Subdomains</h3>';
+                                const subdomainColumns = [
+                                    { header: 'Subdomain', key: 'subdomain' },
+                                    { header: 'Status', key: 'status', format: 'status' },
+                                    { header: 'Open Ports', key: 'ports', format: 'ports' }
+                                ];
+                                detailsHTML += createTable(resultData.subdomain.results, subdomainColumns);
+                            }
+
+                            if (resultData.port?.ports) {
+                                detailsHTML += '<h3><i class="fas fa-plug"></i> Open Ports</h3>';
+                                const portColumns = [
+                                    { header: 'Port', key: 'port' },
+                                    { header: 'State', key: 'state' },
+                                    { header: 'Service', key: 'service' }
+                                ];
+                                detailsHTML += createTable(resultData.port.ports, portColumns);
+                            }
+
+                            if (resultData.directory?.directories) {
+                                detailsHTML += '<h3><i class="fas fa-folder-open"></i> Directories</h3>';
+                                const dirColumns = [
+                                    { header: 'URL', key: 'url' },
+                                    { header: 'Status', key: 'status', format: 'status-code' }
+                                ];
+                                detailsHTML += createTable(resultData.directory.directories, dirColumns);
+                            }
+
+                            if (resultData.cms?.results) {
+                                detailsHTML += '<h3><i class="fas fa-puzzle-piece"></i> CMS Detection</h3>';
+                                let cmsData = [];
+                                for (const [cmsType, urls] of Object.entries(resultData.cms.results)) {
+                                    urls.forEach(url => {
+                                        cmsData.push({
+                                            cms: cmsType.charAt(0).toUpperCase() + cmsType.slice(1),
+                                            url: url
+                                        });
+                                    });
+                                }
+                                const cmsColumns = [
+                                    { header: 'CMS', key: 'cms' },
+                                    { header: 'URL', key: 'url' }
+                                ];
+                                detailsHTML += createTable(cmsData, cmsColumns);
+                            }
+
+                            if (resultData.technology?.results) {
+                                detailsHTML += '<h3><i class="fas fa-code"></i> Technologies</h3>';
+                                const techColumns = [
+                                    { header: 'URL', key: 'url' },
+                                    { header: 'Status', key: 'status' },
+                                    { header: 'Technologies', key: 'technologies', format: 'tech' }
+                                ];
+                                detailsHTML += createTable(resultData.technology.results, techColumns);
+                            }
+                            break;
+
+                        default:
+                            detailsHTML += '<h3>Scan Results</h3>';
+                            detailsHTML += `<div class="result-item"><pre>${JSON.stringify(resultData, null, 2)}</pre></div>`;
+                    }
+
+                    detailedResults.innerHTML = detailsHTML || '<div class="result-item">No results to display</div>';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    detailedResults.innerHTML = '<div class="result-item">Error loading scan details</div>';
+                });
+            }
+
+            function deleteScan(scanId) {
+                if (confirm('Are you sure you want to delete this scan?')) {
+                    fetch(`http://192.168.1.13:3000/api/scan/${scanId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+
+                            loadScans();
+                        } else if (data.error) {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to delete scan');
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

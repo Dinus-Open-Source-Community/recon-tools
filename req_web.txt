@@ -1,0 +1,7 @@
+django
+python-whois
+dnspython
+pythonping
+requests
+python-nmap
+builtwith

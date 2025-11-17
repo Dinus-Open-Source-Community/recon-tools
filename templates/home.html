@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Doscom Network{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10 text-center">
+        <h1 class="display-4 mb-4">Selamat Datang di Doscom Network</h1>
+        <p class="lead">apa aja lah pler</p>
+        
+        <div class="row mt-5">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3>WHOIS Lookup</h3>
+                        <p>Cek informasi domain dengan mudah tanpa perlu login</p>
+                        <a href="{% url 'whois_lookup' %}" class="btn btn-primary">Gunakan</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h3>📡 Ping Tool</h3>
+                        <p>Test koneksi jaringan</p>
+                        <a href="{% url 'ping_tool' %}" class="btn btn-warning">Gunakan</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <h3>🛡️ SICON</h3>
+                        <p>Security scanner</p>
+                        <a href="{% url 'sicon_tool' %}" class="btn btn-danger">Gunakan</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Dalam bagian row cards, tambahkan card NSLookup -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">🌐 NSLookup</h5>
+                        <p class="card-text">Cek DNS records (A, MX, TXT, NS, dll) untuk domain apa pun</p>
+                        <a href="{% url 'nslookup' %}" class="btn btn-info">Gunakan</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3>Account System</h3>
+                        <p>Daftar dan login untuk mengakses fitur dashboard</p>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'dashboard' %}" class="btn btn-success">Go to Dashboard</a>
+                        {% else %}
+                            <a href="{% url 'register' %}" class="btn btn-success me-2">Daftar</a>
+                            <a href="{% url 'login' %}" class="btn btn-outline-primary">Login</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

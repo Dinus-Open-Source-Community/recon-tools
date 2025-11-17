@@ -1,0 +1,441 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}NSLookup - DNS Lookup Tool{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h2 class="text-center mb-0">🌐 NSLookup - DNS Lookup Tool</h2>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted text-center">
+                        Cek berbagai DNS records (A, AAAA, CNAME, MX, TXT, NS, SOA) dan Reverse DNS lookup
+                    </p>
+                    
+                    <!-- Lookup Form -->
+                    <form id="nslookupForm">
+                        {% csrf_token %}
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-6">
+                                <label for="domainInput" class="form-label">
+                                    <strong>Domain atau IP Address:</strong>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="domainInput" 
+                                       placeholder="example.com atau 8.8.8.8"
+                                       required
+                                       autocomplete="off">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="recordType" class="form-label">
+                                    <strong>Record Type:</strong>
+                                </label>
+                                <select class="form-select" id="recordType">
+                                    <option value="A">A (IPv4 Address)</option>
+                                    <option value="AAAA">AAAA (IPv6 Address)</option>
+                                    <option value="CNAME">CNAME (Canonical Name)</option>
+                                    <option value="MX">MX (Mail Exchange)</option>
+                                    <option value="TXT">TXT (Text Record)</option>
+                                    <option value="NS">NS (Name Server)</option>
+                                    <option value="SOA">SOA (Start of Authority)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-info w-100" type="submit" id="lookupBtn">
+                                    <span id="btnText">Lookup</span>
+                                    <div id="btnLoading" class="spinner-border spinner-border-sm d-none" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Quick Actions -->
+                    <div class="mt-3">
+                        <small class="text-muted">Quick lookup:</small>
+                        <div class="d-flex flex-wrap gap-2 mt-1">
+                            <button class="btn btn-sm btn-outline-secondary quick-lookup" data-domain="google.com" data-type="A">google.com (A)</button>
+                            <button class="btn btn-sm btn-outline-secondary quick-lookup" data-domain="google.com" data-type="MX">google.com (MX)</button>
+                            <button class="btn btn-sm btn-outline-secondary quick-lookup" data-domain="8.8.8.8">8.8.8.8 (Reverse)</button>
+                            <button class="btn btn-sm btn-outline-secondary quick-lookup" data-domain="github.com" data-type="NS">github.com (NS)</button>
+                        </div>
+                    </div>
+
+                    <!-- Result Area -->
+                    <div id="resultArea" class="d-none mt-4">
+                        <div class="card border-success">
+                            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0" id="resultTitle">Hasil NSLookup</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="nslookupResult"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Area -->
+                    <div id="errorArea" class="alert alert-danger d-none mt-3">
+                        <strong>❌ Error:</strong> <span id="errorMessage"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">📚 Jenis DNS Records</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="record-types">
+                                <div class="record-item">
+                                    <strong>A</strong> - IPv4 Address
+                                </div>
+                                <div class="record-item">
+                                    <strong>AAAA</strong> - IPv6 Address
+                                </div>
+                                <div class="record-item">
+                                    <strong>CNAME</strong> - Canonical Name (Alias)
+                                </div>
+                                <div class="record-item">
+                                    <strong>MX</strong> - Mail Exchange
+                                </div>
+                                <div class="record-item">
+                                    <strong>TXT</strong> - Text Record
+                                </div>
+                                <div class="record-item">
+                                    <strong>NS</strong> - Name Server
+                                </div>
+                                <div class="record-item">
+                                    <strong>SOA</strong> - Start of Authority
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">ℹ️ Cara Penggunaan</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="small">
+                                <li>Masukkan domain (contoh: <code>example.com</code>) atau IP address</li>
+                                <li>Pilih jenis record DNS yang ingin dicek</li>
+                                <li>Untuk IP address, akan otomatis melakukan reverse DNS lookup</li>
+                                <li>Gunakan quick lookup untuk contoh cepat</li>
+                                <li>Hasil akan menampilkan TTL (Time To Live) dari setiap record</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.record-types {
+    font-size: 0.9em;
+}
+
+.record-item {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.record-item:last-child {
+    border-bottom: none;
+}
+
+.dns-result-item {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-left: 4px solid #007bff;
+}
+
+.result-type-badge {
+    background: #007bff;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: bold;
+}
+
+.ttl-badge {
+    background: #6c757d;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.7em;
+}
+
+.quick-lookup:hover {
+    transform: translateY(-1px);
+    transition: all 0.2s;
+}
+
+.additional-info {
+    background: #e9ecef;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.info-item {
+    background: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    console.log('NSLookup Tool loaded');
+    
+    // Handle form submission
+    $('#nslookupForm').on('submit', function(e) {
+        e.preventDefault();
+        performLookup();
+    });
+
+    // Handle quick lookup buttons
+    $('.quick-lookup').on('click', function() {
+        const domain = $(this).data('domain');
+        const type = $(this).data('type') || 'A';
+        
+        $('#domainInput').val(domain);
+        $('#recordType').val(type);
+        performLookup();
+    });
+
+    function performLookup() {
+        const domain = $('#domainInput').val().trim();
+        const recordType = $('#recordType').val();
+        
+        console.log('Looking up:', domain, 'Type:', recordType);
+        
+        if (!domain) {
+            showError('Silakan masukkan domain atau IP address');
+            return;
+        }
+
+        // Set loading state
+        setLoadingState(true);
+        hideAllResults();
+
+        // Prepare data
+        const formData = new FormData();
+        formData.append('domain', domain);
+        formData.append('record_type', recordType);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        // Perform AJAX request
+        fetch('{% url "nslookup_api" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Response:', data);
+            
+            if (data.success) {
+                displayResults(data.data);
+            } else {
+                showError(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('AJAX Error:', error);
+            showError('Gagal terhubung ke server');
+        })
+        .finally(() => {
+            setLoadingState(false);
+        });
+    }
+
+    function setLoadingState(isLoading) {
+        if (isLoading) {
+            $('#btnText').addClass('d-none');
+            $('#btnLoading').removeClass('d-none');
+            $('#lookupBtn').prop('disabled', true);
+        } else {
+            $('#btnText').removeClass('d-none');
+            $('#btnLoading').addClass('d-none');
+            $('#lookupBtn').prop('disabled', false);
+        }
+    }
+
+    function hideAllResults() {
+        $('#resultArea').addClass('d-none');
+        $('#errorArea').addClass('d-none');
+    }
+
+    function displayResults(data) {
+        let resultsHtml = '';
+        
+        // Header info
+        resultsHtml += `
+            <div class="mb-3 p-3 bg-light rounded">
+                <div class="row">
+                    <div class="col-md-6">
+                        <strong>Query:</strong> <code>${data.domain}</code>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Record Type:</strong> <span class="result-type-badge">${data.record_type}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Results
+        if (data.results && data.results.length > 0) {
+            resultsHtml += `<h6>📊 Hasil Lookup:</h6>`;
+            
+            data.results.forEach((result, index) => {
+                resultsHtml += `
+                    <div class="dns-result-item">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="result-type-badge">${result.type}</span>
+                            <span class="ttl-badge">TTL: ${result.ttl}</span>
+                        </div>
+                        <div class="result-content">
+                            ${formatResultContent(result)}
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            resultsHtml += `<div class="alert alert-warning">Tidak ada hasil ditemukan</div>`;
+        }
+        
+        // Additional info
+        if (data.additional_info && Object.keys(data.additional_info).length > 0) {
+            resultsHtml += `<h6 class="mt-4">📋 Informasi Tambahan:</h6>`;
+            resultsHtml += formatAdditionalInfo(data.additional_info);
+        }
+        
+        $('#nslookupResult').html(resultsHtml);
+        $('#resultTitle').text(`Hasil NSLookup untuk ${data.domain}`);
+        $('#resultArea').removeClass('d-none');
+        $('#errorArea').addClass('d-none');
+        
+        // Scroll to results
+        $('html, body').animate({
+            scrollTop: $('#resultArea').offset().top - 100
+        }, 500);
+    }
+
+    function formatResultContent(result) {
+        let content = '';
+        
+        switch(result.type) {
+            case 'A':
+                content = `
+                    <strong>IPv4 Address:</strong> <code>${result.value}</code><br>
+                    <small class="text-muted">Hostname: ${result.hostname || 'N/A'}</small>
+                `;
+                break;
+            case 'AAAA':
+                content = `<strong>IPv6 Address:</strong> <code>${result.value}</code>`;
+                break;
+            case 'CNAME':
+                content = `<strong>Canonical Name:</strong> <code>${result.value}</code>`;
+                break;
+            case 'MX':
+                content = `
+                    <strong>Mail Server:</strong> <code>${result.mail_server}</code><br>
+                    <strong>Priority:</strong> ${result.priority}
+                `;
+                break;
+            case 'TXT':
+                content = `<strong>Text Record:</strong> "${result.value}"`;
+                break;
+            case 'NS':
+                content = `<strong>Name Server:</strong> <code>${result.value}</code>`;
+                break;
+            case 'PTR':
+                content = `<strong>Hostname:</strong> <code>${result.value}</code>`;
+                break;
+            default:
+                content = `<strong>Value:</strong> <code>${result.value}</code>`;
+        }
+        
+        return content;
+    }
+
+    function formatAdditionalInfo(info) {
+        let html = '<div class="additional-info">';
+        
+        if (info.nameservers) {
+            html += `
+                <div class="mb-2">
+                    <strong>Name Servers:</strong>
+                    ${info.nameservers.map(ns => `<div class="ms-2"><code>${ns}</code></div>`).join('')}
+                </div>
+            `;
+        }
+        
+        if (info.soa) {
+            html += `
+                <div>
+                    <strong>SOA Record:</strong>
+                    <div class="info-grid mt-2">
+                        <div class="info-item"><strong>Primary NS:</strong> ${info.soa.mname}</div>
+                        <div class="info-item"><strong>Admin Email:</strong> ${info.soa.rname}</div>
+                        <div class="info-item"><strong>Serial:</strong> ${info.soa.serial}</div>
+                        <div class="info-item"><strong>Refresh:</strong> ${info.soa.refresh}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+        return html;
+    }
+
+    function showError(message) {
+        $('#errorMessage').text(message);
+        $('#errorArea').removeClass('d-none');
+        $('#resultArea').addClass('d-none');
+        
+        $('html, body').animate({
+            scrollTop: $('#errorArea').offset().top - 100
+        }, 500);
+    }
+
+    // Enter key support
+    $('#domainInput').on('keypress', function(e) {
+        if (e.which === 13) {
+            e.preventDefault();
+            performLookup();
+        }
+    });
+
+    // Focus on input field
+    $('#domainInput').focus();
+});
+</script>
+{% endblock %}

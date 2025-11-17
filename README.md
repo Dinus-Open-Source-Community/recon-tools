@@ -1,6 +1,10 @@
-## tested on
+## dosnet
+
+### tested on
 arch linux with kali distrobox for the server
+
 Q: posible run without kali distrobox?
+
 A: yes but u must install the tool and configure it manually, im to lazy to do it anyway
 
 tools need to install:
@@ -10,7 +14,7 @@ tools need to install:
 - assetfinder
 - dirsearch
 
-## how to run
+### how to run
 install lib
 ```
 pip3 install -r req_web.txt

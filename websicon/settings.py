@@ -28,7 +28,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
         "20.2.200.57",
-        'localhost'
+        "localhost",
+        "recon_tools",
+        "recon_tools:8001",
     # '192.168.1.13'
     # '.ngrok-free.app',
     # 'c1b3285ea8c2.ngrok-free.app',

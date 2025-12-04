@@ -16,4 +16,6 @@ RUN mv assetfinder /usr/bin
 
 COPY . .
 RUN pip install -r requirements.txt
-CMD ["uwsgi", "--socket", "0.0.0.0:8001", "--protocol", "uwsgi", "-w", "wsgi", "--master", "--processes", "4", "--threads", "2", "--wsgi-file", "/app/websicon/wsgi.py"]
+# CMD ["uwsgi", "--socket", "0.0.0.0:8001", "--protocol", "uwsgi", "-w", "wsgi", "--master", "--processes", "4", "--threads", "2", "--wsgi-file", "/app/websicon/wsgi.py"]
+
+CMD ["uwsgi", "--http", "0.0.0.0:8001", "--wsgi-file", "/app/websicon/wsgi.py", "--callable", "application", "--master", "--processes", "4", "--threads", "2"]

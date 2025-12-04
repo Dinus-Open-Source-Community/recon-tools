@@ -9,3 +9,5 @@ wafw00f
 sublist3r
 subfinder
 dirsearch
+multiping
+uwsgi

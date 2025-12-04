@@ -1,11 +1,8 @@
-FROM python:3.10-alpine3.22
+FROM python:3.10-bookworm
 
-RUN apk add --update \
-    curl \
-    && rm -rf /var/cache/apk/*
-
-RUN apk --no-cache add wget
-RUN apk --no-cache add tar
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl gcc wget tar \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN tar --version
 
@@ -19,4 +16,4 @@ RUN mv assetfinder /usr/bin
 
 COPY . .
 RUN pip install -r requirements.txt
-CMD [ "python", "manage.py", "runserver", "0.0.0.0:9099" ]
+CMD ["uwsgi", "--socket", "0.0.0.0:8001", "--protocol", "uwsgi", "-w", "wsgi", "--master", "--processes", "4", "--threads", "2", "--wsgi-file", "/app/websicon/wsgi.py"]

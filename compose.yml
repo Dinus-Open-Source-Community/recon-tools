@@ -1,6 +1,30 @@
+name: recon-tools
+
+  # comment this below if you on main production server
+  # we want this 'recon_tools' service has one network with main reverse proxy
+networks:
+  recon_network:
+    driver: bridge
+
 services:
   recon_tools:
+    container_name: recon_tools_app
     build: .
-    network_mode: "host"
     volumes:
       - .:/app:rw
+    networks:
+      - recon_network
+
+  # comment this below if you on main production server
+  # because we dont want nested reverse proxy working on..
+
+  nginx:
+    container_name: recon_tools_reverse_proxy
+    build:
+      dockerfile: ./docker/nginx/Dockerfile
+    networks:
+      - recon_network
+    ports:
+      - "8000:8000"
+    depends_on:
+      - recon_tools
